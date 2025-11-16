@@ -7,12 +7,14 @@
     "@types/bun": "latest"
   },
   "scripts": {
-    "dev": "bun --watch src/index.ts"
+    "dev": "bun --watch src/server.ts"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
-    "hono": "^4.10.6"
+    "@prisma/client": "^6.19.0",
+    "hono": "^4.10.6",
+    "prisma": "^6.19.0"
   }
 }

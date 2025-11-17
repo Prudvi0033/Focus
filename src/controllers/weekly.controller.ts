@@ -56,15 +56,6 @@ export const weeklyReport = async (c: Context) => {
       weeklyStats[key] += durationMs / 60000;
     });
 
-    await prisma.session.deleteMany({
-      where: {
-        userId: userId,
-        date: {
-          lt: monday,
-        },
-      },
-    });
-
     return c.json({
       error: false,
       msg: "Weekly Report",

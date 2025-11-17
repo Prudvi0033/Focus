@@ -4,13 +4,20 @@ import { prisma } from "../lib/prisma";
 export const getInfo = async (c: Context) => {
   try {
     const { userId } = c.get("user");
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayStr = new Date().toISOString().split("T")[0];
+    //@ts-ignore
+    const today = new Date(todayStr);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     const totalSessions = await prisma.session.findMany({
       where: {
-        userId: userId,
-        date: { equals: today },
+        userId,
+        date: {
+          gte: today,
+          lt: tomorrow,
+        },
         endTime: { not: null },
       },
     });
@@ -62,30 +69,29 @@ export const getStreak = async (c: Context) => {
   try {
     const { userId } = c.get("user");
 
-    const allSessions = await prisma.session.findMany({
-      where: {
-        userId,
-        endTime: { not: null }
-      },
+    const sessions = await prisma.session.findMany({
+      where: { userId, endTime: { not: null } },
       select: { date: true },
-      orderBy: { date: "desc" }
+      orderBy: { date: "desc" },
     });
 
-    // Extract unique dates (YYYY-MM-DD)
-    const uniqueDates = [...new Set(
-      allSessions.map(s => s.date.toISOString().split("T")[0])
-    )];
+    const unique = [
+      ...new Set(sessions.map((s) => s.date.toISOString().split("T")[0])),
+    ];
 
     let streak = 0;
-    let expected = new Date();
-    expected.setHours(0, 0, 0, 0); 
 
-    for (let d of uniqueDates) {
-      const sessionDate = new Date(d!);
+    // Start at today's YYYY-MM-DD (local)
+    let expected = new Date().toLocaleDateString("en-CA");
 
-      if (sessionDate.getTime() === expected.getTime()) {
+    for (const d of unique) {
+      if (d === expected) {
         streak++;
-        expected.setDate(expected.getDate() - 1); 
+
+        // Move expected to previous day
+        const temp = new Date(expected);
+        temp.setDate(temp.getDate() - 1);
+        expected = temp.toISOString().split("T")[0]!;
       } else {
         break;
       }
@@ -94,12 +100,10 @@ export const getStreak = async (c: Context) => {
     return c.json({
       error: false,
       msg: "User streak",
-      streak
+      streak,
     });
-
-  } catch (error) {
-    console.error("Error while fetching streak:", error);
+  } catch (err) {
+    console.error(err);
     return c.json({ error: true, msg: "Failed to fetch stats" }, 500);
   }
 };
-

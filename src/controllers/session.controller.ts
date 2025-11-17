@@ -38,7 +38,6 @@ export const createSession = async (c: Context) => {
   }
 };
 
-
 export const endSession = async (c: Context) => {
   try {
     const { id } = c.req.param();

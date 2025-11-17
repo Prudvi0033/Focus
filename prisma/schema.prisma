@@ -25,9 +25,12 @@ model User {
 
 model Session {
   id        String    @id @default(cuid())
-  title     String
   startTime DateTime  @default(now())
+  duration  Int
   endTime   DateTime?
+
+  date      DateTime  @default(now())   @db.Date
+
   createdAt DateTime  @default(now())
   
   userId    String

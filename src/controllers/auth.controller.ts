@@ -6,13 +6,11 @@ import { JWT_SECRET } from "../../services/constants";
 
 const generateToken = ({
   userId,
-  username,
 }: {
   userId: string;
-  username: string;
 }) => {
   return jwt.sign(
-    { userId, username },
+    { userId },
     JWT_SECRET as string,
     { expiresIn: "7d" }
   );
@@ -46,7 +44,6 @@ export const register = async (c: Context) => {
 
       const token = generateToken({
         userId: existingUser.id,
-        username: existingUser.username,
       });
 
       const { password: _, ...safeUser } = existingUser;
@@ -68,7 +65,6 @@ export const register = async (c: Context) => {
 
     const token = generateToken({
       userId: newUser.id,
-      username: newUser.username,
     });
 
     const { password: _, ...safeUser } = newUser;
